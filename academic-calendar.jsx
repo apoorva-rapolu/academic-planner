@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import downloadGif from "./download.gif";
+import lofiBg from "./background_lofi.gif";
 import postcardImg from "./postcard.png";
 
 
@@ -164,7 +164,7 @@ export default function AcademicCalendar() {
   const [backgrounds, setBackgrounds] = useState(() => {
     const saved = localStorage.getItem("backgrounds");
     const initialList = [
-      { id: "custom-gif", name: "My GIF (download.gif)", url: downloadGif },
+      { id: "custom-gif", name: "My GIF (background_lofi.gif)", url: lofiBg },
       { id: "postcard-img", name: "Postcard Image", url: postcardImg }
     ];
     if (saved) {
@@ -178,7 +178,7 @@ export default function AcademicCalendar() {
   });
   const [backgroundGif, setBackgroundGif] = useState(() => {
     const saved = localStorage.getItem("backgroundGif");
-    if (!saved || saved.includes("download.gif")) {
+    if (!saved || saved.includes("background_lofi.gif")) {
       return postcardImg;
     }
     return saved;
@@ -1366,7 +1366,7 @@ export default function AcademicCalendar() {
                       <button className="btn btn-ghost btn-sm" style={{borderColor: "rgba(226,75,74,0.4)", color: "#E24B4A", padding: "6px 8px", minWidth: 28}} title="Delete Background" onClick={() => {
                         setBackgrounds(prev => prev.filter(x => x.id !== bg.id));
                         if (backgroundGif === bg.url) {
-                          setBackgroundGif(downloadGif);
+                          setBackgroundGif(lofiBg);
                         }
                       }}>🗑</button>
                     )}
