@@ -161,31 +161,6 @@ export default function AcademicCalendar() {
   const [examChecklists, setExamChecklists] = useState({});
   const [editingAssignment, setEditingAssignment] = useState(null);
 
-  const [backgrounds, setBackgrounds] = useState(() => {
-    const saved = localStorage.getItem("backgrounds");
-    const initialList = [
-      { id: "custom-gif", name: "My GIF (background_lofi.gif)", url: lofiBg },
-      { id: "postcard-img", name: "Postcard Image", url: postcardImg }
-    ];
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (!parsed.some(bg => bg.id === "postcard-img")) {
-        parsed.push({ id: "postcard-img", name: "Postcard Image", url: postcardImg });
-      }
-      return parsed;
-    }
-    return initialList;
-  });
-  const [backgroundGif, setBackgroundGif] = useState(() => {
-    const saved = localStorage.getItem("backgroundGif");
-    if (!saved || saved.includes("background_lofi.gif")) {
-      return postcardImg;
-    }
-    return saved;
-  });
-  const [newGifUrl, setNewGifUrl] = useState("");
-  const [newGifName, setNewGifName] = useState("");
-  const [showBgSettings, setShowBgSettings] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("activeTab", tab);
@@ -208,13 +183,6 @@ export default function AcademicCalendar() {
     };
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("backgrounds", JSON.stringify(backgrounds));
-  }, [backgrounds]);
-
-  useEffect(() => {
-    localStorage.setItem("backgroundGif", backgroundGif);
-  }, [backgroundGif]);
 
   useEffect(() => {
     localStorage.setItem("sidebarCollapsed", sidebarCollapsed);
@@ -313,7 +281,7 @@ export default function AcademicCalendar() {
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
-      background-image: url('${backgroundGif}');
+      background-image: url('${lofiBg}');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -461,9 +429,6 @@ export default function AcademicCalendar() {
               display: "block"
             }} 
           />
-          <button className="btn btn-ghost" style={{width:"100%",fontSize:12}} onClick={()=>setShowBgSettings(true)}>
-            🖼️ Customize BG
-          </button>
         </div>
       </div>
     );
@@ -1270,120 +1235,6 @@ export default function AcademicCalendar() {
     }
   };
 
-  function BackgroundSettingsModal() {
-    const addGif = () => {
-      if (newGifUrl.trim()) {
-        const nameVal = newGifName.trim() || newGifUrl.trim().split('/').pop() || `Custom GIF ${backgrounds.length + 1}`;
-        const newBg = {
-          id: `custom-${Date.now()}`,
-          name: nameVal,
-          url: newGifUrl.trim()
-        };
-        setBackgrounds(prev => [...prev, newBg]);
-        setBackgroundGif(newBg.url);
-        setNewGifUrl("");
-        setNewGifName("");
-      }
-    };
-
-    return (
-      <div className="modal-bg" onClick={e=>{if(e.target.className==="modal-bg")setShowBgSettings(false)}}>
-        <div className="modal">
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-            <h2 style={{fontSize:16,fontWeight:700}}>Choose Background</h2>
-            <button className="btn btn-ghost btn-sm" onClick={()=>setShowBgSettings(false)}>✕</button>
-          </div>
-          <div style={{display:"flex",flexDirection:"column",gap:16}}>
-            <div>
-              <label style={{display:"block",fontSize:12,fontWeight:600,marginBottom:8}}>Add Custom GIF (URL/Path)</label>
-              <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                <input className="input" placeholder="Custom Name (e.g. Lo-fi Chill Room)" value={newGifName} onChange={e=>setNewGifName(e.target.value)} />
-                <div style={{display:"flex",gap:8}}>
-                  <input className="input" placeholder="Paste GIF URL or relative path (e.g. ./relax.gif)" value={newGifUrl} onChange={e=>setNewGifUrl(e.target.value)} />
-                  <button className="btn btn-primary" onClick={addGif}>Add</button>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label style={{display:"block",fontSize:12,fontWeight:600,marginBottom:8}}>Upload Local Image / GIF</label>
-              <input type="file" accept="image/*" className="input" style={{padding:"6px 10px"}} onChange={e => {
-                const file = e.target.files[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onload = (event) => {
-                    const dataUrl = event.target.result;
-                    const newBg = {
-                      id: `custom-${Date.now()}`,
-                      name: file.name,
-                      url: dataUrl
-                    };
-                    setBackgrounds(prev => [...prev, newBg]);
-                    setBackgroundGif(newBg.url);
-                  };
-                  reader.readAsDataURL(file);
-                }
-              }} />
-            </div>
-
-            <div>
-              <label style={{display:"block",fontSize:12,fontWeight:600,marginBottom:8}}>Select a Theme</label>
-              <div style={{display:"flex",flexDirection:"column",gap:8,maxHeight:250,overflowY:"auto"}}>
-                {backgrounds.map(bg => (
-                  <div key={bg.id} style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    background: "rgba(255,255,255,0.03)",
-                    borderRadius: 8,
-                    padding: "4px 8px",
-                    border: "1px solid rgba(255,255,255,0.05)"
-                  }}>
-                    <button className="btn" style={{
-                      flex: 1,
-                      textAlign: "left",
-                      padding: "10px 12px",
-                      background: backgroundGif === bg.url ? "#7F77DD" : "transparent",
-                      color: backgroundGif === bg.url ? "#fff" : "#e8e8f0",
-                      border: "none",
-                      borderRadius: "6px",
-                      cursor: "pointer",
-                      fontWeight: backgroundGif === bg.url ? "600" : "500",
-                      transition: "all 0.15s",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap"
-                    }} onClick={() => setBackgroundGif(bg.url)}>
-                      {bg.name}
-                    </button>
-                    <button className="btn btn-ghost btn-sm" style={{padding: "6px 8px", minWidth: 28}} title="Rename Background" onClick={() => {
-                      const newName = prompt("Enter new name for this background:", bg.name);
-                      if (newName && newName.trim()) {
-                        setBackgrounds(prev => prev.map(x => x.id === bg.id ? { ...x, name: newName.trim() } : x));
-                      }
-                    }}>✏️</button>
-                    {bg.id !== "custom-gif" && (
-                      <button className="btn btn-ghost btn-sm" style={{borderColor: "rgba(226,75,74,0.4)", color: "#E24B4A", padding: "6px 8px", minWidth: 28}} title="Delete Background" onClick={() => {
-                        setBackgrounds(prev => prev.filter(x => x.id !== bg.id));
-                        if (backgroundGif === bg.url) {
-                          setBackgroundGif(lofiBg);
-                        }
-                      }}>🗑</button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:8}}>
-              <button className="btn btn-primary" onClick={()=>setShowBgSettings(false)}>Close</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   function EditSlotModal() {
     const saveSlot = () => {
       const { day, time } = editingSlot;
@@ -1451,7 +1302,7 @@ export default function AcademicCalendar() {
       {showAddAssignment && AddAssignmentModal()}
       {selectedEvent && EventDetailModal()}
       {selectedAssignment && AssignmentDetailModal()}
-      {showBgSettings && BackgroundSettingsModal()}
+
       {editingSlot && EditSlotModal()}
       {notification && <div className="notif">{notification}</div>}
     </div>
